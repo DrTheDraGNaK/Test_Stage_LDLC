@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c33b1e85c417df64f86870aff3732056, type: 3}
   m_Name: GameConfig
   m_EditorClassIdentifier: 
-  gameTimeInSeconds: 10
-  totalObjectsRequired: 15
+  gameTimeInSeconds: 120
+  totalObjectsRequired: 6
