@@ -14,14 +14,18 @@ public class PaintBall : MonoBehaviour
     private void OnCollisionEnter(Collision collision)
     {
         GameObject hitObject = collision.gameObject;
-        PickableObject pickable = hitObject.GetComponent<PickableObject>();
 
-        if (pickable != null)
+        if (hitObject.layer != LayerMask.NameToLayer("Gun") &&
+            hitObject.layer != LayerMask.NameToLayer("Player"))
         {
-            pickable.SetColorType(color);
+            PickableObject pickable = hitObject.GetComponent<PickableObject>();
+            if (pickable != null)
+            {
+                pickable.SetColorType(color);
+            }
+            Debug.Log(collision.gameObject.name);
+            Destroy(gameObject);
         }
-
-        Destroy(gameObject); 
     }
 
     private Color GetColorFromType(ColorType colorType)

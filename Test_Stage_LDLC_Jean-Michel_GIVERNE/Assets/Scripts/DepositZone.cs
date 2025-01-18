@@ -1,31 +1,21 @@
 using UnityEngine;
-using UnityEngine.Events;
-using UnityEvent = UnityEngine.Events.UnityEvent;
 
 public class DepositZone : MonoBehaviour
 {
     [SerializeField] private ColorType acceptedType;
     [SerializeField] private int objectCount = 0;
+    [SerializeField] private GameManager gameManager;
 
-    public UnityEvent<int> onObjectCountChanged;
+    private int objectiveCount;
 
     private void OnTriggerEnter(Collider other)
     {
         PickableObject item = other.GetComponent<PickableObject>();
 
-        if (item != null)
+        if (item != null && item.GetColorType() == acceptedType)
         {
-            // Check if the type matches
-            if (item.GetColorType() == acceptedType)
-            {
-                objectCount++;
-                onObjectCountChanged?.Invoke(objectCount);
-                Debug.Log($"Object deposited! Total count: {objectCount}");
-            }
-            else
-            {
-                Debug.Log("Incorrect object type for this zone");
-            }
+            objectCount++;
+            gameManager.OnObjectCountChanged(acceptedType, objectCount);
         }
     }
 
@@ -36,18 +26,17 @@ public class DepositZone : MonoBehaviour
         if (item != null && item.GetColorType() == acceptedType)
         {
             objectCount--;
-            onObjectCountChanged?.Invoke(objectCount);
-            Debug.Log($"Object removed! Total count: {objectCount}");
+            gameManager.OnObjectCountChanged(acceptedType, objectCount);
         }
     }
 
-    public void SetAcceptedType(ColorType newType)
+    public ColorType GetAcceptedType()
     {
-        acceptedType = newType;
+        return acceptedType;
     }
 
-    public int GetObjectCount()
+    public void SetObjectiveCount(int count)
     {
-        return objectCount;
+        objectiveCount = count;
     }
 }

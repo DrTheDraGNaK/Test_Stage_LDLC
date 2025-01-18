@@ -6,6 +6,8 @@ public class ObjectInteraction : MonoBehaviour
     [SerializeField] private Transform holdPos;
     [SerializeField] private GameObject rightArmModel;
 
+    [SerializeField] private Vector3 paintballGunPos;
+
     public float throwForce = 500f;
     public float pickUpRange = 5f;
     private GameObject heldObj;
@@ -47,6 +49,16 @@ public class ObjectInteraction : MonoBehaviour
             }
         }
 
+        
+        if (Input.GetKeyDown(KeyCode.Mouse0)) 
+        {
+            if (heldObj != null && !holdingPaintGun) 
+            {
+                StopClipping();
+                ThrowObject();
+            }
+        }
+
         if (heldObj != null)
         {
             MoveObject();
@@ -74,7 +86,7 @@ public class ObjectInteraction : MonoBehaviour
             if (holdingPaintGun)
             {
                 heldObj.transform.localRotation = Quaternion.identity;
-                heldObj.transform.localPosition = Vector3.zero;
+                heldObj.transform.localPosition = paintballGunPos;
             }
 
             Physics.IgnoreCollision(heldObj.GetComponent<Collider>(), player.GetComponent<Collider>(), true);
