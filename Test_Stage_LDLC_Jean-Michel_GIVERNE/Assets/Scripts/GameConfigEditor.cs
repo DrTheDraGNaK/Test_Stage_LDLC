@@ -1,77 +1,125 @@
-//using UnityEngine;
-//using UnityEditor;
+using UnityEngine;
+using UnityEditor;
 
-//[CustomEditor(typeof(GameConfig))]
-//public class GameConfigEditor : Editor
-//{
-//    private GUIStyle headerStyle;
-//    private GUIStyle subHeaderStyle;
+[CustomEditor(typeof(GameConfig))]
+public class GameConfigEditor : Editor
+{
+    private SerializedProperty gameTimeInSeconds;
+    private SerializedProperty totalObjectsRequired;
 
-//    private void InitializeStyles()
-//    {
-//        if (headerStyle == null)
-//        {
-//            headerStyle = new GUIStyle(EditorStyles.boldLabel)
-//            {
-//                fontSize = 14,
-//                padding = new RectOffset(5, 5, 10, 10)
-//            };
-//        }
+    private bool timeSettingsFoldout = true;
+    private bool objectSettingsFoldout = true;
 
-//        if (subHeaderStyle == null)
-//        {
-//            subHeaderStyle = new GUIStyle(EditorStyles.boldLabel)
-//            {
-//                fontSize = 12,
-//                padding = new RectOffset(5, 5, 5, 5)
-//            };
-//        }
-//    }
+    private const int MIN_OBJECTS = 4;
+    private const int MAX_OBJECTS = 50;
 
-//    public override void OnInspectorGUI()
-//    {
-//        InitializeStyles();
+    private void OnEnable()
+    {
+        gameTimeInSeconds = serializedObject.FindProperty("gameTimeInSeconds");
+        totalObjectsRequired = serializedObject.FindProperty("totalObjectsRequired");
+    }
 
-//        GameConfig gameConfig = (GameConfig)target;
+    public override void OnInspectorGUI()
+    {
+        serializedObject.Update();
 
-//        EditorGUILayout.Space(10);
-//        EditorGUILayout.LabelField("Game Configuration", headerStyle);
+        EditorGUILayout.Space(10);
 
-//        EditorGUILayout.Space(10);
-//        EditorGUILayout.LabelField("Timer Settings", subHeaderStyle);
-//        EditorGUI.indentLevel++;
+        GUIStyle headerStyle = new GUIStyle(EditorStyles.boldLabel);
+        headerStyle.fontSize = 16;
+        headerStyle.alignment = TextAnchor.MiddleCenter;
+        EditorGUILayout.LabelField("Game Configuration", headerStyle);
 
-//        // Timer configuration
-//        EditorGUILayout.BeginHorizontal();
-//        int minutes = Mathf.FloorToInt(gameConfig.gameTimeInSeconds / 60);
-//        int seconds = Mathf.FloorToInt(gameConfig.gameTimeInSeconds % 60);
+        EditorGUILayout.Space(15);
 
-//        EditorGUILayout.LabelField("Game Duration:", GUILayout.Width(100));
-//        minutes = EditorGUILayout.IntField("Minutes", minutes, GUILayout.Width(100));
-//        seconds = EditorGUILayout.IntField("Seconds", seconds, GUILayout.Width(100));
-//        EditorGUILayout.EndHorizontal();
+        DrawTimerSection();
 
-//        gameConfig.gameTimeInSeconds = minutes * 60 + seconds;
+        EditorGUILayout.Space(10);
 
-//        EditorGUI.indentLevel--;
-//        EditorGUILayout.Space(10);
+        DrawObjectSection();
 
-//        // Objects configuration
-//        EditorGUILayout.LabelField("Objects Settings", subHeaderStyle);
-//        EditorGUI.indentLevel++;
+        if (GUI.changed)
+        {
+            serializedObject.ApplyModifiedProperties();
+        }
+    }
 
-//        gameConfig.totalObjectsRequired = EditorGUILayout.IntField("Total Objects Required", gameConfig.totalObjectsRequired);
+    private void DrawTimerSection()
+    {
+        EditorGUILayout.BeginVertical(EditorStyles.helpBox);
 
-//        EditorGUI.indentLevel--;
+        timeSettingsFoldout = EditorGUILayout.Foldout(timeSettingsFoldout, "Timer Settings", true);
 
-//        EditorGUILayout.Space(10);
-//        EditorGUILayout.HelpBox(
-//            "The total objects will be randomly distributed among the deposit zones found in the scene at runtime.",
-//            MessageType.Info);
+        if (timeSettingsFoldout)
+        {
+            EditorGUI.indentLevel++;
 
-//        if (GUI.changed)
-//        {
-//            EditorUtility.SetDirty(target);
-//        }
-//    }
-//}
+            EditorGUILayout.Space(5);
+
+            EditorGUILayout.BeginHorizontal();
+            float minutes = Mathf.Floor(gameTimeInSeconds.floatValue / 60);
+            float seconds = gameTimeInSeconds.floatValue % 60;
+
+            EditorGUILayout.LabelField("Game Duration", GUILayout.Width(100));
+
+            EditorGUI.BeginChangeCheck();
+            minutes = EditorGUILayout.FloatField(minutes, GUILayout.Width(50));
+            EditorGUILayout.LabelField("min", GUILayout.Width(30));
+            seconds = EditorGUILayout.FloatField(seconds, GUILayout.Width(50));
+            EditorGUILayout.LabelField("sec", GUILayout.Width(30));
+
+            if (EditorGUI.EndChangeCheck())
+            {
+                gameTimeInSeconds.floatValue = (minutes * 60) + seconds;
+            }
+            EditorGUILayout.EndHorizontal();
+
+            EditorGUILayout.LabelField($"Total time in seconds: {gameTimeInSeconds.floatValue}");
+
+            EditorGUI.indentLevel--;
+        }
+
+        EditorGUILayout.EndVertical();
+    }
+
+    private void DrawObjectSection()
+    {
+        EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+
+        objectSettingsFoldout = EditorGUILayout.Foldout(objectSettingsFoldout, "Object Settings", true);
+
+        if (objectSettingsFoldout)
+        {
+            EditorGUI.indentLevel++;
+
+            EditorGUILayout.Space(5);
+
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField($"Required Objects ({MIN_OBJECTS}-{MAX_OBJECTS}):");
+
+            EditorGUI.BeginChangeCheck();
+            int newValue = EditorGUILayout.IntField(totalObjectsRequired.intValue);
+            if (EditorGUI.EndChangeCheck())
+            {
+                totalObjectsRequired.intValue = Mathf.Clamp(newValue, MIN_OBJECTS, MAX_OBJECTS);
+            }
+            EditorGUILayout.EndHorizontal();
+
+            EditorGUILayout.Space(5);
+            EditorGUI.ProgressBar(
+                EditorGUILayout.GetControlRect(false, 20),
+                (float)(totalObjectsRequired.intValue - MIN_OBJECTS) / (MAX_OBJECTS - MIN_OBJECTS),
+                $"Objects: {totalObjectsRequired.intValue}/{MAX_OBJECTS}"
+            );
+
+            if (totalObjectsRequired.intValue < MIN_OBJECTS || totalObjectsRequired.intValue > MAX_OBJECTS)
+            {
+                EditorGUILayout.HelpBox($"Le nombre d'objets doit être entre {MIN_OBJECTS} et {MAX_OBJECTS}.", MessageType.Warning);
+            }
+
+            EditorGUI.indentLevel--;
+        }
+
+        EditorGUILayout.EndVertical();
+    }
+}

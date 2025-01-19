@@ -19,11 +19,10 @@ public class ObjectInteraction : MonoBehaviour
 
     void Start()
     {
-        // Vérification des références requises
         if (holdPos == null)
         {
             Debug.LogError("HoldPos is not assigned in the inspector!");
-            enabled = false; // Désactive le script si holdPos n'est pas assigné
+            enabled = false; 
             return;
         }
 
@@ -34,7 +33,6 @@ public class ObjectInteraction : MonoBehaviour
             return;
         }
 
-        // Cacher le texte d'interaction au démarrage
         if (interactionText != null)
             interactionText.gameObject.SetActive(false);
     }

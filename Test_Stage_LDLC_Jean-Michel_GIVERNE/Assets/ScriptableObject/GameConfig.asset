@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: GameConfig
   m_EditorClassIdentifier: 
   gameTimeInSeconds: 100
-  totalObjectsRequired: 6
+  totalObjectsRequired: 4

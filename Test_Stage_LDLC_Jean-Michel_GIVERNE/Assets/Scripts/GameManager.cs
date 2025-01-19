@@ -98,7 +98,7 @@ public class GameManager : MonoBehaviour
 
         for (int i = 0; i < types.Count - 1; i++)
         {
-            int maxForThisType = remainingObjects - (types.Count - i - 1); // Ensure at least 1 for each remaining type
+            int maxForThisType = remainingObjects - (types.Count - i - 1); 
             int assignedAmount = Random.Range(1, maxForThisType + 1);
             remainingObjects -= assignedAmount;
             objectivesByType[types[i]] = assignedAmount;
@@ -166,7 +166,7 @@ public class GameManager : MonoBehaviour
                 }
                 else
                 {
-                    objectivesText[index].color = Color.white; // Couleur par défaut si aucun mapping n'existe
+                    objectivesText[index].color = Color.white; 
                 }
 
                 index++;
