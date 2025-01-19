@@ -59,10 +59,12 @@ public class ObjectSpawner : MonoBehaviour
         float halfWidth = spawnAreaSize.x * 0.5f;
         float halfLength = spawnAreaSize.y * 0.5f;
 
-        float x = Random.Range(-halfWidth, halfWidth);
-        float z = Random.Range(-halfLength, halfLength);
+        Vector3 spawnerPosition = transform.position;
 
-        return new Vector3(x, spawnHeight, z);
+        float x = spawnerPosition.x + Random.Range(-halfWidth, halfWidth);
+        float z = spawnerPosition.z + Random.Range(-halfLength, halfLength);
+
+        return new Vector3(x, spawnerPosition.y + spawnHeight, z);
     }
 
     private void OnDrawGizmosSelected()
