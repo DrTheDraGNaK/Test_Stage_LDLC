@@ -18,6 +18,8 @@ public class GameManager : MonoBehaviour
     private Dictionary<ColorType, int> objectivesByType = new Dictionary<ColorType, int>();
     private Dictionary<ColorType, int> currentCounts = new Dictionary<ColorType, int>();
 
+    private Dictionary<ColorType, Color> colorMapping = new Dictionary<ColorType, Color>();
+
     private void Start()
     {
         if (!ValidateSerializedFields())
@@ -25,9 +27,16 @@ public class GameManager : MonoBehaviour
             Debug.LogError("GameManager: Missing references in inspector!");
             return;
         }
-
+        InitializeColorMapping();
         InitializeGame();
         LockCursor();
+    }
+    private void InitializeColorMapping()
+    {
+        colorMapping[ColorType.Red] = Color.red;
+        colorMapping[ColorType.Green] = Color.green;
+        colorMapping[ColorType.Blue] = Color.blue;
+        colorMapping[ColorType.Yellow] = Color.yellow;
     }
 
     private bool ValidateSerializedFields()
@@ -60,7 +69,6 @@ public class GameManager : MonoBehaviour
 
         DistributeObjectives(zonesByType.Keys.ToList());
 
-        // Initialize current counts
         foreach (var type in objectivesByType.Keys)
         {
             currentCounts[type] = 0;
@@ -79,7 +87,6 @@ public class GameManager : MonoBehaviour
 
         UpdateObjectivesDisplay();
 
-        // Hide screens
         victoryScreen.SetActive(false);
         defeatScreen.SetActive(false);
     }
@@ -153,6 +160,15 @@ public class GameManager : MonoBehaviour
 
                 objectivesText[index].text =
                     $"{objective.Key}: {currentCounts[objective.Key]}/{objective.Value}";
+                if (colorMapping.ContainsKey(objective.Key))
+                {
+                    objectivesText[index].color = colorMapping[objective.Key];
+                }
+                else
+                {
+                    objectivesText[index].color = Color.white; // Couleur par défaut si aucun mapping n'existe
+                }
+
                 index++;
             }
         }
@@ -216,6 +232,7 @@ public class GameManager : MonoBehaviour
         isGameOver = true;
         victoryScreen.SetActive(true);
         UnlockCursor();
+        Time.timeScale = 0;
     }
 
     private void ShowDefeatScreen()
@@ -228,6 +245,7 @@ public class GameManager : MonoBehaviour
 
         defeatScreen.SetActive(true);
         UnlockCursor();
+        Time.timeScale = 0;
 
         int textIndex = 0;
         foreach (var objective in objectivesByType)
@@ -261,7 +279,7 @@ public class GameManager : MonoBehaviour
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
-
+        Time.timeScale = 1;
         StartCoroutine(LoadSceneAsync());
     }
 

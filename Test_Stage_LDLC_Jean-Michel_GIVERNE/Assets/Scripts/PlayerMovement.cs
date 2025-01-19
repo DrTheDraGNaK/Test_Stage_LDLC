@@ -68,6 +68,9 @@ public class PlayerMovement : MonoBehaviour
 
     private void Update()
     {
+        if (IsGamePaused())
+            return;
+
         moveInput = inputActions.Player.Move.ReadValue<Vector2>();
         lookInput = inputActions.Player.Look.ReadValue<Vector2>();
 
@@ -93,6 +96,8 @@ public class PlayerMovement : MonoBehaviour
 
     private void HandleCameraRotation()
     {
+        if (IsGamePaused())
+            return;
         float rotationY = lookInput.x * mouseSensitivity;
         transform.Rotate(Vector3.up * rotationY);
 
@@ -119,6 +124,10 @@ public class PlayerMovement : MonoBehaviour
             jumpPressed = false;
             canJump = false;
         }
+    }
+    private bool IsGamePaused()
+    {
+        return Time.timeScale == 0;
     }
 
     private void ApplyGravity()
